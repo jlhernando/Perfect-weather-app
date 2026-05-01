@@ -80,6 +80,14 @@
 		return valid.length > 0 ? Math.round(Math.min(...valid)) : 0;
 	});
 
+	// Current temperature (only for today)
+	let currentTemp = $derived.by(() => {
+		if (!dayData || !days[selectedDay]?.isToday) return null;
+		const hour = new Date().getHours();
+		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
+		return temps[hour] != null ? Math.round(temps[hour]) : null;
+	});
+
 	function handleDaySelect(index: number) {
 		selectedDay = index;
 		chartComponent?.scrollToDay(index);
@@ -168,6 +176,7 @@
 	<div class="py-3 pb-8 animate-fade-in">
 		<WeatherHeader
 			date={days[selectedDay].date}
+			{currentTemp}
 			maxTemp={dayHasData ? maxTemp : null}
 			minTemp={dayHasData ? minTemp : null}
 			weatherCodes={dayData.weatherCodes}
