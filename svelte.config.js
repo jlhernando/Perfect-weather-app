@@ -7,10 +7,14 @@ const config = {
 		runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true)
 	},
 	kit: {
-		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
-		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
-		adapter: adapter()
+		adapter: adapter(),
+		prerender: {
+			handleHttpError({ path }) {
+				// /api/* routes are CF Pages Functions, not SvelteKit routes
+				if (path.startsWith('/api/')) return 'ignore';
+				throw new Error(`404: ${path}`);
+			}
+		}
 	}
 };
 

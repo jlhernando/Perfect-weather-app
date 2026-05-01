@@ -12,6 +12,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.57.0",
@@ -25,6 +26,9 @@
 		"vite": "^8.0.7"
 	},
 	"dependencies": {
-		"d3": "^7.9.0"
+		"@resvg/resvg-wasm": "^2.6.2",
+		"d3": "^7.9.0",
+		"satori": "^0.26.0",
+		"yoga-wasm-web": "^0.3.3"
 	}
 }

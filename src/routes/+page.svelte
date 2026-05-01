@@ -11,11 +11,13 @@
 
 	let weatherData: WeatherResponse | null = $state(null);
 	let locationName: string | null = $state(null);
+	let currentCoords: { lat: number; lon: number } | null = $state(null);
 	let selectedDay = $state(0);
 	let tempMode: 'real' | 'feels' = $state('real');
 	let loading = $state(true);
 	let error: string | null = $state(null);
 	let chartComponent: WeatherChart;
+	let shareStatus: 'idle' | 'copied' = $state('idle');
 
 	// Derived: days list (only include days with actual temperature data)
 	let days = $derived.by(() => {
@@ -98,10 +100,27 @@
 			]);
 			weatherData = weather;
 			locationName = name ?? loc.name;
+			currentCoords = { lat: loc.latitude, lon: loc.longitude };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load weather data';
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function handleShare() {
+		if (!currentCoords) return;
+		const url = `${window.location.origin}/?lat=${currentCoords.lat}&lon=${currentCoords.lon}`;
+		const shareData = {
+			title: `${locationName ? 'Tiempo en ' + locationName : 'Perfect Weather'}`,
+			url
+		};
+		if (navigator.share) {
+			try { await navigator.share(shareData); } catch {}
+		} else {
+			await navigator.clipboard.writeText(url);
+			shareStatus = 'copied';
+			setTimeout(() => (shareStatus = 'idle'), 2000);
 		}
 	}
 
@@ -114,6 +133,7 @@
 			]);
 			weatherData = weather;
 			locationName = name;
+			currentCoords = coords;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load weather data';
 		} finally {
@@ -133,6 +153,18 @@
 	</div>
 {:else if weatherData && dayData}
 	<LocationSearch onselect={handleLocationSelect} />
+	<!-- Share button — top left -->
+	<button
+		onclick={handleShare}
+		class="share-button"
+		aria-label="Compartir"
+	>
+		{#if shareStatus === 'copied'}
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+		{:else}
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+		{/if}
+	</button>
 	<div class="py-3 pb-8 animate-fade-in">
 		<WeatherHeader
 			date={days[selectedDay].date}
@@ -170,6 +202,27 @@
 {/if}
 
 <style>
+	.share-button {
+		position: fixed;
+		top: 12px;
+		left: 12px;
+		z-index: 40;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		color: rgba(255, 255, 255, 0.7);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: background 0.2s;
+	}
+	.share-button:active {
+		background: rgba(255, 255, 255, 0.2);
+	}
 	.animate-fade-in {
 		animation: fadeIn 0.4s ease;
 	}

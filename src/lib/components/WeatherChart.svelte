@@ -334,6 +334,27 @@
 			}
 		}
 
+		// Current time indicator ("now" line)
+		const now = new Date();
+		const nowHourIdx = (now.getTime() - dataStartTime) / msPerHour;
+		if (nowHourIdx >= 0 && nowHourIdx < validHourCount) {
+			const nx = xFull(nowHourIdx);
+			dataGroup.append('line')
+				.attr('x1', nx).attr('x2', nx)
+				.attr('y1', -8).attr('y2', innerH)
+				.attr('stroke', 'rgba(255,255,255,0.45)')
+				.attr('stroke-width', 2)
+				.attr('stroke-dasharray', '6,4');
+			dataGroup.append('text')
+				.attr('x', nx).attr('y', 8)
+				.attr('text-anchor', 'middle')
+				.attr('fill', 'rgba(255,255,255,0.6)')
+				.attr('font-size', '9px')
+				.attr('font-weight', '600')
+				.attr('font-family', '-apple-system, sans-serif')
+				.text('Ahora');
+		}
+
 		// Min/Max annotation group — updated when selected day changes
 		const minMaxGroup = dataGroup.append('g').attr('class', 'minmax-annotations');
 		allDataRef = allData;
