@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import * as d3 from 'd3';
-	import type { HourlyData } from '$lib/api/weather';
+	import type { HourlyData, DailyData } from '$lib/api/weather';
 	import { getIcon } from '$lib/utils/icons';
 
 	interface Props {
 		hourly: HourlyData;
+		daily: DailyData;
 		mode: 'real' | 'feels';
 		selectedDay: number;
 		onDayChange: (day: number) => void;
 	}
 
-	let { hourly, mode, selectedDay, onDayChange }: Props = $props();
+	let { hourly, daily, mode, selectedDay, onDayChange }: Props = $props();
 
 	let container: HTMLDivElement;
 
@@ -280,6 +281,57 @@
 				.attr('stroke', 'rgba(255,255,255,0.12)')
 				.attr('stroke-width', 1)
 				.attr('stroke-dasharray', '4,4');
+		}
+
+		// Sunrise/sunset markers
+		const dataStartTime = new Date(hourly.time[0]).getTime();
+		const msPerHour = 3600000;
+
+		for (let di = 0; di < daily.sunrise.length; di++) {
+			const sunriseTime = new Date(daily.sunrise[di]).getTime();
+			const sunsetTime = new Date(daily.sunset[di]).getTime();
+			const sunriseHourIdx = (sunriseTime - dataStartTime) / msPerHour;
+			const sunsetHourIdx = (sunsetTime - dataStartTime) / msPerHour;
+
+			// Sunrise marker
+			if (sunriseHourIdx >= 0 && sunriseHourIdx < validHourCount) {
+				const sx = xFull(sunriseHourIdx);
+				dataGroup.append('line')
+					.attr('x1', sx).attr('x2', sx)
+					.attr('y1', -8).attr('y2', innerH)
+					.attr('stroke', 'rgba(255,180,50,0.35)')
+					.attr('stroke-width', 1)
+					.attr('stroke-dasharray', '3,3');
+				const sunriseDate = new Date(daily.sunrise[di]);
+				const riseLabel = `${String(sunriseDate.getHours()).padStart(2,'0')}:${String(sunriseDate.getMinutes()).padStart(2,'0')}`;
+				dataGroup.append('text')
+					.attr('x', sx).attr('y', 8)
+					.attr('text-anchor', 'middle')
+					.attr('fill', 'rgba(255,180,50,0.7)')
+					.attr('font-size', '9px')
+					.attr('font-family', '-apple-system, sans-serif')
+					.text(riseLabel);
+			}
+
+			// Sunset marker
+			if (sunsetHourIdx >= 0 && sunsetHourIdx < validHourCount) {
+				const sx = xFull(sunsetHourIdx);
+				dataGroup.append('line')
+					.attr('x1', sx).attr('x2', sx)
+					.attr('y1', -8).attr('y2', innerH)
+					.attr('stroke', 'rgba(140,100,220,0.35)')
+					.attr('stroke-width', 1)
+					.attr('stroke-dasharray', '3,3');
+				const sunsetDate = new Date(daily.sunset[di]);
+				const setLabel = `${String(sunsetDate.getHours()).padStart(2,'0')}:${String(sunsetDate.getMinutes()).padStart(2,'0')}`;
+				dataGroup.append('text')
+					.attr('x', sx).attr('y', 8)
+					.attr('text-anchor', 'middle')
+					.attr('fill', 'rgba(140,100,220,0.7)')
+					.attr('font-size', '9px')
+					.attr('font-family', '-apple-system, sans-serif')
+					.text(setLabel);
+			}
 		}
 
 		// Min/Max annotation group — updated when selected day changes

@@ -147,6 +147,7 @@
 		<WeatherChart
 			bind:this={chartComponent}
 			hourly={weatherData.hourly}
+			daily={weatherData.daily}
 			mode={tempMode}
 			{selectedDay}
 			onDayChange={handleDayChangeFromChart}

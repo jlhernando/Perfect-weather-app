@@ -11,8 +11,14 @@ export interface HourlyData {
 	weathercode: number[];
 }
 
+export interface DailyData {
+	sunrise: string[];
+	sunset: string[];
+}
+
 export interface WeatherResponse {
 	hourly: HourlyData;
+	daily: DailyData;
 	timezone: string;
 }
 
@@ -55,6 +61,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherRes
 		latitude: String(lat),
 		longitude: String(lon),
 		hourly: 'temperature_2m,apparent_temperature,precipitation,weathercode',
+		daily: 'sunrise,sunset',
 		models: 'best_match',
 		forecast_days: '7',
 		timezone: 'auto'
