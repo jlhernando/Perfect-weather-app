@@ -8,6 +8,8 @@
 	import WeatherChart from '$lib/components/WeatherChart.svelte';
 	import TempToggle from '$lib/components/TempToggle.svelte';
 	import LocationSearch from '$lib/components/LocationSearch.svelte';
+	import AttireSuggestion from '$lib/components/AttireSuggestion.svelte';
+	import UmbrellaIndicator from '$lib/components/UmbrellaIndicator.svelte';
 
 	let weatherData: WeatherResponse | null = $state(null);
 	let locationName: string | null = $state(null);
@@ -195,6 +197,12 @@
 		/>
 
 		<TempToggle mode={tempMode} onchange={(m) => (tempMode = m)} />
+
+		<!-- Attire & Umbrella modules -->
+		<div class="flex gap-3 px-5 pt-4">
+			<AttireSuggestion {maxTemp} />
+			<UmbrellaIndicator weatherCodes={dayData.weatherCodes} />
+		</div>
 
 		<!-- Legend -->
 		<div class="flex justify-center gap-5 pt-4 px-5">
