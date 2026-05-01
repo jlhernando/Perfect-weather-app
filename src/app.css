@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-dark-bg: #000;
+	--color-dark-card: #1c1c1e;
+	--color-dark-card-hover: #2c2c2e;
+	--color-ios-blue: #0a84ff;
+	--color-ios-cyan: #5ac8fa;
+	--color-ios-yellow: #ffd60a;
+	--color-rain-bar: rgba(90, 160, 255, 0.3);
+	--color-rain-border: rgba(90, 160, 255, 0.5);
+	--color-rain-text: rgba(90, 160, 255, 0.5);
+	--font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+html, body {
+	height: 100%;
+	background: var(--color-dark-bg);
+	color: #fff;
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: transparent;
+	overflow-x: hidden;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
