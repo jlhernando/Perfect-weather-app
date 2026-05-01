@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getLocation, fetchWeather, reverseGeocode } from '$lib/api/weather';
-	import type { WeatherResponse } from '$lib/api/weather';
+	import type { WeatherResponse, LocationResult } from '$lib/api/weather';
 	import CalendarStrip from '$lib/components/CalendarStrip.svelte';
 	import WeatherHeader from '$lib/components/WeatherHeader.svelte';
 	import HourlyIcons from '$lib/components/HourlyIcons.svelte';
 	import WeatherChart from '$lib/components/WeatherChart.svelte';
 	import TempToggle from '$lib/components/TempToggle.svelte';
+	import LocationSearch from '$lib/components/LocationSearch.svelte';
 
 	let weatherData: WeatherResponse | null = $state(null);
 	let locationName: string | null = $state(null);
@@ -16,14 +17,22 @@
 	let error: string | null = $state(null);
 	let chartComponent: WeatherChart;
 
-	// Derived: days list
+	// Derived: days list (only include days with actual temperature data)
 	let days = $derived.by(() => {
 		if (!weatherData) return [];
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 		const result = [];
-		for (let i = 0; i < 7; i++) {
-			const t = weatherData.hourly.time[i * 24];
+		const totalHours = weatherData.hourly.time.length;
+		const totalDays = Math.ceil(totalHours / 24);
+		for (let i = 0; i < totalDays; i++) {
+			const startIdx = i * 24;
+			if (startIdx >= totalHours) break;
+			// Check if this day has any valid temperature data
+			const dayTemps = weatherData.hourly.temperature_2m.slice(startIdx, startIdx + 24);
+			const hasData = dayTemps.some((t) => t != null);
+			if (!hasData) break;
+			const t = weatherData.hourly.time[startIdx];
 			const date = new Date(t);
 			result.push({
 				date,
@@ -47,17 +56,26 @@
 		};
 	});
 
+	// Does this day have valid data?
+	let dayHasData = $derived.by(() => {
+		if (!dayData) return false;
+		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
+		return temps.some((t) => t != null);
+	});
+
 	// Derived: max/min temp for selected day
 	let maxTemp = $derived.by(() => {
 		if (!dayData) return 0;
 		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
-		return Math.round(Math.max(...temps.filter((t) => t != null)));
+		const valid = temps.filter((t) => t != null);
+		return valid.length > 0 ? Math.round(Math.max(...valid)) : 0;
 	});
 
 	let minTemp = $derived.by(() => {
 		if (!dayData) return 0;
 		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
-		return Math.round(Math.min(...temps.filter((t) => t != null)));
+		const valid = temps.filter((t) => t != null);
+		return valid.length > 0 ? Math.round(Math.min(...valid)) : 0;
 	});
 
 	function handleDaySelect(index: number) {
@@ -67,6 +85,24 @@
 
 	function handleDayChangeFromChart(day: number) {
 		selectedDay = day;
+	}
+
+	async function handleLocationSelect(loc: LocationResult) {
+		loading = true;
+		error = null;
+		selectedDay = 0;
+		try {
+			const [weather, name] = await Promise.all([
+				fetchWeather(loc.latitude, loc.longitude),
+				reverseGeocode(loc.latitude, loc.longitude)
+			]);
+			weatherData = weather;
+			locationName = name ?? loc.name;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load weather data';
+		} finally {
+			loading = false;
+		}
 	}
 
 	onMount(async () => {
@@ -96,18 +132,21 @@
 		Could not load weather data.<br />{error}
 	</div>
 {:else if weatherData && dayData}
+	<LocationSearch onselect={handleLocationSelect} />
 	<div class="py-3 pb-8 animate-fade-in">
 		<WeatherHeader
 			date={days[selectedDay].date}
-			{maxTemp}
-			{minTemp}
+			maxTemp={dayHasData ? maxTemp : null}
+			minTemp={dayHasData ? minTemp : null}
 			weatherCodes={dayData.weatherCodes}
 			{locationName}
 		/>
 
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} />
 
-		<HourlyIcons hours={dayData.hours} weatherCodes={dayData.weatherCodes} />
+		{#if dayHasData}
+			<HourlyIcons hours={dayData.hours} weatherCodes={dayData.weatherCodes} />
+		{/if}
 
 		<WeatherChart
 			bind:this={chartComponent}

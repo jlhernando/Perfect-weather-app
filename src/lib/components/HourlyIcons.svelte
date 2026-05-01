@@ -7,25 +7,41 @@
 	}
 
 	let { hours, weatherCodes }: Props = $props();
+
+	// Show every 3 hours to fit within chart width
+	let filteredIndices = $derived(
+		hours.map((_, i) => i).filter((i) => i % 3 === 0)
+	);
 </script>
 
-<div class="overflow-x-auto scrollbar-none py-3">
-	<div class="flex px-5 min-w-max">
-		{#each hours as hour, i}
-			<div class="flex flex-col items-center min-w-10 gap-0.5">
-				<span class="text-xl leading-tight">{getIcon(weatherCodes[i])}</span>
-				<span class="text-[9px] font-medium text-white/35">{String(hour).padStart(2, '0')}</span>
-			</div>
-		{/each}
-	</div>
+<div class="icons-row">
+	{#each filteredIndices as i}
+		<div class="icon-item">
+			<span class="icon">{getIcon(weatherCodes[i])}</span>
+			<span class="hour-label">{String(hours[i]).padStart(2, '0')}</span>
+		</div>
+	{/each}
 </div>
 
 <style>
-	.scrollbar-none {
-		scrollbar-width: none;
-		-ms-overflow-style: none;
+	.icons-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 40px 4px;
 	}
-	.scrollbar-none::-webkit-scrollbar {
-		display: none;
+	.icon-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2px;
+	}
+	.icon {
+		font-size: 18px;
+		line-height: 1.2;
+	}
+	.hour-label {
+		font-size: 9px;
+		font-weight: 500;
+		color: rgba(255,255,255,0.35);
 	}
 </style>

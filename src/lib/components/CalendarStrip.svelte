@@ -15,40 +15,85 @@
 	let { days, selectedIndex, onselect }: Props = $props();
 
 	function dayNameClass(day: DayInfo): string {
-		return `text-[11px] font-semibold uppercase mb-1.5 ${day.isToday ? 'text-[#0a84ff]' : 'text-white/50'}`;
+		return `day-name ${day.isToday ? 'today' : ''}`;
 	}
 
 	function dayNumClass(day: DayInfo, i: number): string {
-		const base = 'text-[17px] font-medium w-8 h-8 flex items-center justify-center rounded-full transition-all';
-		if (i === selectedIndex && day.isToday) return `${base} bg-[#0a84ff] text-white font-semibold`;
-		if (i === selectedIndex && !day.isToday) return `${base} bg-white/90 text-black font-semibold`;
-		if (day.isToday) return `${base} text-[#0a84ff]`;
-		return base;
+		let cls = 'day-num';
+		if (i === selectedIndex && day.isToday) cls += ' selected-today';
+		else if (i === selectedIndex) cls += ' selected';
+		else if (day.isToday) cls += ' today';
+		return cls;
 	}
 </script>
 
-<div class="flex overflow-x-auto px-4 py-2 gap-1 scrollbar-none scroll-snap-x">
+<div class="calendar-strip">
 	{#each days as day, i}
-		<button
-			class="flex flex-col items-center min-w-12 py-2 px-1 rounded-2xl transition-colors select-none"
-			onclick={() => onselect(i)}
-		>
-			<span class={dayNameClass(day)}>
-				{dayNameShort(day.date)}
-			</span>
-			<span class={dayNumClass(day, i)}>
-				{day.date.getDate()}
-			</span>
+		<button class="day-btn" onclick={() => onselect(i)}>
+			<span class={dayNameClass(day)}>{dayNameShort(day.date)}</span>
+			<span class={dayNumClass(day, i)}>{day.date.getDate()}</span>
 		</button>
 	{/each}
 </div>
 
 <style>
-	.scrollbar-none {
-		scrollbar-width: none;
-		-ms-overflow-style: none;
+	.calendar-strip {
+		display: flex;
+		justify-content: flex-start;
+		padding: 8px 16px;
+		gap: 2px;
 	}
-	.scrollbar-none::-webkit-scrollbar {
-		display: none;
+	.day-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		flex: 1;
+		max-width: 52px;
+		padding: 6px 2px;
+		border-radius: 14px;
+		border: none;
+		background: none;
+		cursor: pointer;
+		-webkit-user-select: none;
+		user-select: none;
+		transition: background 0.2s;
+	}
+	.day-btn:active {
+		background: rgba(255,255,255,0.08);
+	}
+	.day-name {
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		margin-bottom: 4px;
+		color: rgba(255,255,255,0.5);
+	}
+	.day-name.today {
+		color: #0a84ff;
+	}
+	.day-num {
+		font-size: 16px;
+		font-weight: 500;
+		width: 30px;
+		height: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		color: white;
+		transition: all 0.2s;
+	}
+	.day-num.today {
+		color: #0a84ff;
+	}
+	.day-num.selected {
+		background: rgba(255,255,255,0.9);
+		color: black;
+		font-weight: 600;
+	}
+	.day-num.selected-today {
+		background: #0a84ff;
+		color: white;
+		font-weight: 600;
 	}
 </style>

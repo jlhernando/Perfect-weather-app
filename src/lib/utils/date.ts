@@ -12,6 +12,13 @@ export function formatDateLong(date: Date): string {
 	return `${capitalize(day)}, ${date.getDate()} de ${month} de ${date.getFullYear()}`;
 }
 
+export function formatDateWithLocation(date: Date, location: string | null): string {
+	const day = DAY_NAMES_LONG[date.getDay()];
+	const month = MONTH_NAMES[date.getMonth()];
+	const dateStr = `${capitalize(day)}, ${date.getDate()} ${month} ${date.getFullYear()}`;
+	return location ? `${location} · ${dateStr}` : dateStr;
+}
+
 function capitalize(s: string): string {
 	return s.charAt(0).toUpperCase() + s.slice(1);
 }
