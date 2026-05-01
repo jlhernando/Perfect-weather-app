@@ -33,23 +33,24 @@
 
 <div class="px-5 pb-2">
 	{#if maxTemp != null && minTemp != null}
-		{#if currentTemp != null}
-			<div class="text-center">
+		<div class="text-center" style="min-height: 120px;">
+			{#if currentTemp != null}
 				<div class="text-[72px] font-extralight tracking-tighter leading-none">{currentTemp}&deg;</div>
-				<div class="text-[15px] text-white/60 mt-1">{dominantIcon} {CONDITION_TEXT[getDominantCode(validCodes)] || ''}</div>
+			{:else}
+				<div class="text-[72px] font-extralight tracking-tighter leading-none">
+					{maxTemp}&deg;<span class="text-white/30 px-2 tracking-normal">/</span><span class="text-white/50">{minTemp}&deg;</span>
+				</div>
+			{/if}
+			<div class="text-[15px] text-white/60 mt-1">{dominantIcon} {CONDITION_TEXT[getDominantCode(validCodes)] || ''}</div>
+			{#if currentTemp != null}
 				<div class="text-[15px] text-white/40 mt-0.5">Max. {maxTemp}&deg;  Min. {minTemp}&deg;</div>
-			</div>
-		{:else}
-			<div class="flex items-baseline gap-0.5">
-				<span class="text-[42px] font-light tracking-tight">{maxTemp}&deg;</span>
-				<span class="text-[42px] font-light tracking-tight text-white/50">{minTemp}&deg;</span>
-				<span class="text-4xl ml-2">{dominantIcon}</span>
-			</div>
-			<div class="text-xs text-white/40 mt-0.5">Celsius (&deg;C)</div>
-		{/if}
+			{/if}
+		</div>
 	{:else}
-		<div class="text-[18px] text-white/30 py-4">
-			No hay datos disponibles para esta fecha
+		<div class="text-center" style="min-height: 120px;">
+			<div class="text-[18px] text-white/30 py-4">
+				No hay datos disponibles para esta fecha
+			</div>
 		</div>
 	{/if}
 </div>
