@@ -52,6 +52,7 @@ async function ensureInit() {
 }
 
 interface WeatherApiResponse {
+	utc_offset_seconds: number;
 	hourly: { temperature_2m: number[]; weathercode: number[] };
 	daily: {
 		sunrise: string[]; sunset: string[];
@@ -75,7 +76,9 @@ export const onRequest: PagesFunction = async (context) => {
 	]);
 	const weather: WeatherApiResponse = await weatherRes.json();
 
-	const hourIndex = Math.min(new Date().getHours(), weather.hourly.temperature_2m.length - 1);
+	// Use the location's timezone offset to get the correct local hour
+	const localNow = new Date(Date.now() + weather.utc_offset_seconds * 1000);
+	const hourIndex = Math.min(localNow.getUTCHours(), weather.hourly.temperature_2m.length - 1);
 	const temp = Math.round(weather.hourly.temperature_2m[hourIndex]);
 	const weatherCode = weather.hourly.weathercode[hourIndex] ?? 0;
 	const maxTemp = Math.round(weather.daily.temperature_2m_max[0]);

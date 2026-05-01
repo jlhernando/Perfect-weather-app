@@ -27,7 +27,8 @@ async function getWeatherSummary(lat: string, lon: string): Promise<{ temp: numb
 			`&hourly=temperature_2m,weathercode&forecast_days=1&timezone=auto`
 		);
 		const data: any = await res.json();
-		const hour = Math.min(new Date().getHours(), data.hourly.temperature_2m.length - 1);
+		const localNow = new Date(Date.now() + (data.utc_offset_seconds ?? 0) * 1000);
+		const hour = Math.min(localNow.getUTCHours(), data.hourly.temperature_2m.length - 1);
 		const conditions: Record<number, string> = {
 			0: 'Cielo despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
 			45: 'Niebla', 51: 'Llovizna', 61: 'Lluvia', 65: 'Lluvia fuerte',
