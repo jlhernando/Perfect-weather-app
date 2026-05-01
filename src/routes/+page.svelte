@@ -4,7 +4,7 @@
 	import type { WeatherResponse, LocationResult } from '$lib/api/weather';
 	import CalendarStrip from '$lib/components/CalendarStrip.svelte';
 	import WeatherHeader from '$lib/components/WeatherHeader.svelte';
-	import HourlyIcons from '$lib/components/HourlyIcons.svelte';
+
 	import WeatherChart from '$lib/components/WeatherChart.svelte';
 	import TempToggle from '$lib/components/TempToggle.svelte';
 	import LocationSearch from '$lib/components/LocationSearch.svelte';
@@ -144,10 +144,6 @@
 
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} />
 
-		{#if dayHasData}
-			<HourlyIcons hours={dayData.hours} weatherCodes={dayData.weatherCodes} />
-		{/if}
-
 		<WeatherChart
 			bind:this={chartComponent}
 			hourly={weatherData.hourly}
@@ -166,7 +162,7 @@
 			</div>
 			<div class="flex items-center gap-1.5 text-xs text-white/50">
 				<span class="w-2.5 h-2.5 rounded-sm bg-rain-bar"></span>
-				<span>Prob. precipitacion</span>
+				<span>Precipitacion (mm)</span>
 			</div>
 		</div>
 	</div>

@@ -7,7 +7,7 @@ export interface HourlyData {
 	time: string[];
 	temperature_2m: number[];
 	apparent_temperature: number[];
-	precipitation_probability: number[];
+	precipitation: number[];
 	weathercode: number[];
 }
 
@@ -54,7 +54,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherRes
 	const params = new URLSearchParams({
 		latitude: String(lat),
 		longitude: String(lon),
-		hourly: 'temperature_2m,apparent_temperature,precipitation_probability,weathercode',
+		hourly: 'temperature_2m,apparent_temperature,precipitation,weathercode',
 		models: 'best_match',
 		forecast_days: '7',
 		timezone: 'auto'
@@ -88,10 +88,20 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
 }
 
 export async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+	// Try Open-Meteo reverse geocoding first
 	try {
 		const res = await fetch(`${GEOCODE_BASE}?latitude=${lat}&longitude=${lon}&count=1`);
 		const data = await res.json();
-		return data.results?.[0]?.name ?? null;
+		if (data.results?.[0]?.name) return data.results[0].name;
+	} catch {}
+
+	// Fallback: use Nominatim for reverse geocoding
+	try {
+		const res = await fetch(
+			`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`
+		);
+		const data = await res.json();
+		return data.address?.city ?? data.address?.town ?? data.address?.village ?? data.name ?? null;
 	} catch {
 		return null;
 	}

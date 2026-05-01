@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import * as d3 from 'd3';
 	import type { HourlyData } from '$lib/api/weather';
+	import { getIcon } from '$lib/utils/icons';
 
 	interface Props {
 		hourly: HourlyData;
@@ -15,7 +16,7 @@
 	let container: HTMLDivElement;
 
 	const VISIBLE_HOURS = 28;
-	const margin = { top: 16, right: 8, bottom: 28, left: 38 };
+	const margin = { top: 60, right: 8, bottom: 28, left: 38 };
 
 	let temps = $derived(mode === 'real' ? hourly.temperature_2m : hourly.apparent_temperature);
 	let totalHours = $derived(hourly.time.length);
@@ -90,7 +91,7 @@
 		if (!container) return;
 
 		const width = container.clientWidth;
-		const height = 240;
+		const height = 284;
 		const innerW = width - margin.left - margin.right;
 		const innerH = height - margin.top - margin.bottom;
 		innerWRef = innerW;
@@ -122,8 +123,11 @@
 			.domain([tMin, tMax])
 			.range([innerH, 0]);
 
+		// Precipitation in mm — find max to set scale
+		const precipData = hourly.precipitation.slice(0, validHourCount);
+		const maxPrecip = Math.max(1, ...precipData.filter(v => v != null));
 		const yPrecip = d3.scaleLinear()
-			.domain([0, 100])
+			.domain([0, Math.ceil(maxPrecip)])
 			.range([innerH, 0]);
 
 		// Clip path for the chart area
@@ -160,8 +164,11 @@
 				.attr('font-size', '10px')
 				.attr('font-family', '-apple-system, sans-serif'));
 
-		// Right Y-axis (Precipitation %) - inside chart at ~82%
-		const precipTicks = [0, 25, 50, 75, 100];
+		// Right Y-axis (Precipitation mm) - inside chart at ~82%
+		const precipCeil = Math.ceil(maxPrecip);
+		const precipTickStep = precipCeil <= 2 ? 0.5 : precipCeil <= 5 ? 1 : precipCeil <= 20 ? 5 : 10;
+		const precipTicks: number[] = [];
+		for (let v = 0; v <= precipCeil; v += precipTickStep) precipTicks.push(v);
 		for (const v of precipTicks) {
 			g.append('text')
 				.attr('x', innerW * 0.82)
@@ -171,7 +178,7 @@
 				.attr('font-family', '-apple-system, sans-serif')
 				.attr('dominant-baseline', 'middle')
 				.attr('text-anchor', 'end')
-				.text(`${v}%`);
+				.text(`${v}mm`);
 		}
 
 		// Clipped group for scrollable content
@@ -181,11 +188,12 @@
 		// Data group — this gets translated on pan
 		dataGroup = clippedGroup.append('g');
 
-		// Temperature color function: blue (cold) → orange (warm)
+		// Temperature color function: blue (cold) → warm orange/amber
 		function tempColor(t: number): string {
 			const stops: [number, number[]][] = [
-				[0, [60, 130, 230]], [10, [90, 200, 250]], [18, [100, 210, 180]],
-				[24, [255, 200, 50]], [30, [255, 149, 0]], [38, [255, 59, 48]],
+				[0, [70, 140, 220]], [8, [100, 190, 220]], [14, [140, 210, 160]],
+				[18, [220, 200, 80]], [22, [255, 180, 40]], [26, [255, 149, 0]],
+				[30, [255, 110, 30]], [36, [255, 65, 35]],
 			];
 			if (t <= stops[0][0]) return `rgb(${stops[0][1]})`;
 			if (t >= stops[stops.length - 1][0]) return `rgb(${stops[stops.length - 1][1]})`;
@@ -219,20 +227,20 @@
 				.x(d => xFull(d.i)).y0(innerH).y1(d => yTemp(d.temp)).curve(d3.curveLinear);
 			dataGroup.append('path')
 				.datum([d0, d1]).attr('d', segArea)
-				.attr('fill', col).attr('opacity', 0.18);
+				.attr('fill', col).attr('opacity', 0.22);
 		}
 
-		// Precipitation bars (more visible)
+		// Precipitation bars (mm of rain)
 		const barWidth = Math.max(2, pixelsPerHour * 0.5);
 		for (let i = 0; i < validHourCount; i++) {
-			const prob = hourly.precipitation_probability[i];
-			if (prob > 0) {
-				const opacity = 0.2 + (prob / 100) * 0.4;
+			const mm = hourly.precipitation[i];
+			if (mm > 0) {
+				const opacity = 0.25 + Math.min(mm / maxPrecip, 1) * 0.45;
 				dataGroup.append('rect')
 					.attr('x', xFull(i) - barWidth / 2)
-					.attr('y', yPrecip(prob))
+					.attr('y', yPrecip(mm))
 					.attr('width', barWidth)
-					.attr('height', innerH - yPrecip(prob))
+					.attr('height', innerH - yPrecip(mm))
 					.attr('fill', `rgba(80, 140, 255, ${opacity})`)
 					.attr('stroke', 'rgba(100, 170, 255, 0.35)')
 					.attr('stroke-width', 0.5)
@@ -301,6 +309,29 @@
 				.text(label);
 		}
 
+		// Weather icons every 3 hours (scrollable with chart)
+		for (let i = 0; i < validHourCount; i += 3) {
+			const code = hourly.weathercode[i];
+			if (code == null) continue;
+			dataGroup.append('text')
+				.attr('x', xFull(i))
+				.attr('y', -30)
+				.attr('text-anchor', 'middle')
+				.attr('font-size', '22px')
+				.attr('dominant-baseline', 'middle')
+				.text(getIcon(code));
+			// Hour label under icon
+			const hour = new Date(hourly.time[i]).getHours();
+			dataGroup.append('text')
+				.attr('x', xFull(i))
+				.attr('y', -12)
+				.attr('text-anchor', 'middle')
+				.attr('fill', 'rgba(255,255,255,0.4)')
+				.attr('font-size', '10px')
+				.attr('font-family', '-apple-system, sans-serif')
+				.text(`${String(hour).padStart(2, '0')}:00`);
+		}
+
 		// Set initial pan position
 		updatePanPosition(viewStart);
 
@@ -365,4 +396,4 @@
 	});
 </script>
 
-<div bind:this={container} style="margin-top: 0.5rem; height: 240px; cursor: grab; overflow: visible;"></div>
+<div bind:this={container} style="margin-top: 0.5rem; height: 284px; cursor: grab; overflow: visible;"></div>
