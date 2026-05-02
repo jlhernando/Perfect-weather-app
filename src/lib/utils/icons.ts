@@ -1,4 +1,4 @@
-// WMO Weather Code → emoji mapping
+// WMO Weather Code → emoji mapping (day)
 const WMO_ICONS: Record<number, string> = {
 	0: '\u2600\uFE0F',       // Clear sky
 	1: '\uD83C\uDF24',       // Mainly clear
@@ -30,7 +30,18 @@ const WMO_ICONS: Record<number, string> = {
 	99: '\u26C8\uFE0F',      // Thunderstorm w/ heavy hail
 };
 
-export function getIcon(code: number): string {
+// Night variants — only codes that look different at night
+const WMO_ICONS_NIGHT: Record<number, string> = {
+	0: '\uD83C\uDF19',       // Clear sky → crescent moon
+	1: '\uD83C\uDF19',       // Mainly clear → crescent moon
+	2: '\u2601\uFE0F',       // Partly cloudy → cloud (no sun to show)
+	80: '\uD83C\uDF27',      // Slight showers → rain (no sun peeking)
+};
+
+export function getIcon(code: number, isNight = false): string {
+	if (isNight && code in WMO_ICONS_NIGHT) {
+		return WMO_ICONS_NIGHT[code];
+	}
 	return WMO_ICONS[code] ?? '\u2601\uFE0F';
 }
 

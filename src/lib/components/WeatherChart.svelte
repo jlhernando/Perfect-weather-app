@@ -382,6 +382,19 @@
 				.text(label);
 		}
 
+		// Build sunrise/sunset lookup for night detection
+		function isNightHour(hourIdx: number): boolean {
+			const hourTime = dataStartTime + hourIdx * msPerHour;
+			const dayIdx = Math.floor(hourIdx / 24);
+			// Check current day and adjacent days for sunrise/sunset
+			for (let di = Math.max(0, dayIdx - 1); di <= Math.min(daily.sunrise.length - 1, dayIdx + 1); di++) {
+				const sunrise = new Date(daily.sunrise[di]).getTime();
+				const sunset = new Date(daily.sunset[di]).getTime();
+				if (hourTime >= sunrise && hourTime < sunset) return false;
+			}
+			return true;
+		}
+
 		// Weather icons every 3 hours (scrollable with chart)
 		for (let i = 0; i < validHourCount; i += 3) {
 			const code = hourly.weathercode[i];
@@ -392,7 +405,7 @@
 				.attr('text-anchor', 'middle')
 				.attr('font-size', '22px')
 				.attr('dominant-baseline', 'middle')
-				.text(getIcon(code));
+				.text(getIcon(code, isNightHour(i)));
 			// Hour label under icon
 			const hour = new Date(hourly.time[i]).getHours();
 			dataGroup.append('text')
