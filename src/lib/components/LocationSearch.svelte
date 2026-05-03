@@ -143,7 +143,7 @@
 
 <style>
 	.pin-button {
-		position: fixed;
+		position: absolute;
 		top: 12px;
 		right: 12px;
 		z-index: 30;
