@@ -63,7 +63,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherRes
 		hourly: 'temperature_2m,apparent_temperature,precipitation,weathercode',
 		daily: 'sunrise,sunset',
 		models: 'best_match',
-		forecast_days: '7',
+		forecast_days: '10',
 		timezone: 'auto'
 	});
 

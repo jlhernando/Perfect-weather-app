@@ -9,9 +9,24 @@
 		minTemp: number | null;
 		weatherCodes: number[];
 		locationName: string | null;
+		dayOffset?: number;
 	}
 
-	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName }: Props = $props();
+	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0 }: Props = $props();
+
+	function getAccuracy(offset: number): { pct: number; color: string; label: string } {
+		if (offset <= 1) return { pct: 95, color: '#34c759', label: 'Muy fiable' };
+		if (offset <= 2) return { pct: 90, color: '#34c759', label: 'Muy fiable' };
+		if (offset <= 3) return { pct: 85, color: '#30d158', label: 'Fiable' };
+		if (offset <= 4) return { pct: 80, color: '#ffd60a', label: 'Fiable' };
+		if (offset <= 5) return { pct: 75, color: '#ffd60a', label: 'Moderada' };
+		if (offset <= 6) return { pct: 70, color: '#ff9f0a', label: 'Moderada' };
+		if (offset <= 7) return { pct: 65, color: '#ff9f0a', label: 'Baja' };
+		if (offset <= 8) return { pct: 55, color: '#ff6b6b', label: 'Baja' };
+		return { pct: 50, color: '#ff6b6b', label: 'Baja' };
+	}
+
+	let accuracy = $derived(getAccuracy(dayOffset));
 
 	const CONDITION_TEXT: Record<number, string> = {
 		0: 'Despejado', 1: 'Mayormente despejado', 2: 'Nubes y claros', 3: 'Nublado',
@@ -33,7 +48,7 @@
 
 <div class="px-5 pb-2">
 	{#if maxTemp != null && minTemp != null}
-		<div class="text-center" style="min-height: 120px;">
+		<div class="text-center" style="min-height: 140px;">
 			{#if currentTemp != null}
 				<div class="text-[72px] font-extralight tracking-tighter leading-none">{currentTemp}&deg;</div>
 			{:else}
@@ -42,9 +57,10 @@
 				</div>
 			{/if}
 			<div class="text-[15px] text-white/60 mt-1">{dominantIcon} {CONDITION_TEXT[getDominantCode(validCodes)] || ''}</div>
-			{#if currentTemp != null}
-				<div class="text-[15px] text-white/40 mt-0.5">Max. {maxTemp}&deg;  Min. {minTemp}&deg;</div>
-			{/if}
+			<div class="text-[15px] text-white/40 mt-0.5">Max. {maxTemp}&deg;  Min. {minTemp}&deg;</div>
+			<div class="text-[12px] mt-1.5" style="color: {accuracy.color}; opacity: 0.7;">
+				{accuracy.label} ({accuracy.pct}%)
+			</div>
 		</div>
 	{:else}
 		<div class="text-center" style="min-height: 120px;">

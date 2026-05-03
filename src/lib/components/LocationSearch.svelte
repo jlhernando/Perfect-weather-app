@@ -143,9 +143,9 @@
 
 <style>
 	.pin-button {
-		position: absolute;
+		position: fixed;
 		top: 12px;
-		right: 12px;
+		right: max(12px, calc(50% - 360px));
 		z-index: 30;
 		width: 40px;
 		height: 40px;

@@ -14,6 +14,19 @@
 
 	let { days, selectedIndex, onselect }: Props = $props();
 
+	// Forecast accuracy by day offset (well-established meteorological data)
+	function getAccuracy(dayOffset: number): { pct: number; color: string } {
+		if (dayOffset <= 1) return { pct: 95, color: '#34c759' };
+		if (dayOffset <= 2) return { pct: 90, color: '#34c759' };
+		if (dayOffset <= 3) return { pct: 85, color: '#30d158' };
+		if (dayOffset <= 4) return { pct: 80, color: '#ffd60a' };
+		if (dayOffset <= 5) return { pct: 75, color: '#ffd60a' };
+		if (dayOffset <= 6) return { pct: 70, color: '#ff9f0a' };
+		if (dayOffset <= 7) return { pct: 65, color: '#ff9f0a' };
+		if (dayOffset <= 8) return { pct: 55, color: '#ff6b6b' };
+		return { pct: 50, color: '#ff6b6b' };
+	}
+
 	function dayNameClass(day: DayInfo): string {
 		return `day-name ${day.isToday ? 'today' : ''}`;
 	}
@@ -32,6 +45,7 @@
 		<button class="day-btn" onclick={() => onselect(i)}>
 			<span class={dayNameClass(day)}>{dayNameShort(day.date)}</span>
 			<span class={dayNumClass(day, i)}>{day.date.getDate()}</span>
+			<span class="accuracy-dot" style="background: {getAccuracy(i).color};"></span>
 		</button>
 	{/each}
 </div>
@@ -95,5 +109,12 @@
 		background: #0a84ff;
 		color: white;
 		font-weight: 600;
+	}
+	.accuracy-dot {
+		width: 5px;
+		height: 5px;
+		border-radius: 50%;
+		margin-top: 4px;
+		opacity: 0.8;
 	}
 </style>

@@ -125,10 +125,27 @@
 			title: `${locationName ? 'Tiempo en ' + locationName : 'Perfect Weather'}`,
 			url
 		};
+		let shared = false;
 		if (navigator.share) {
-			try { await navigator.share(shareData); } catch {}
-		} else {
-			await navigator.clipboard.writeText(url);
+			try {
+				await navigator.share(shareData);
+				shared = true;
+			} catch {}
+		}
+		if (!shared) {
+			try {
+				await navigator.clipboard.writeText(url);
+			} catch {
+				// Clipboard API also requires secure context; use fallback
+				const ta = document.createElement('textarea');
+				ta.value = url;
+				ta.style.position = 'fixed';
+				ta.style.opacity = '0';
+				document.body.appendChild(ta);
+				ta.select();
+				document.execCommand('copy');
+				document.body.removeChild(ta);
+			}
 			shareStatus = 'copied';
 			setTimeout(() => (shareStatus = 'idle'), 2000);
 		}
@@ -183,6 +200,7 @@
 			minTemp={dayHasData ? minTemp : null}
 			weatherCodes={dayData.weatherCodes}
 			{locationName}
+			dayOffset={selectedDay}
 		/>
 
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} />
@@ -220,9 +238,9 @@
 
 <style>
 	.share-button {
-		position: absolute;
+		position: fixed;
 		top: 12px;
-		left: 12px;
+		left: max(12px, calc(50% - 360px));
 		z-index: 40;
 		width: 40px;
 		height: 40px;
