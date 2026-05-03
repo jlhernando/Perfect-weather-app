@@ -188,7 +188,7 @@
 	.search-content {
 		position: relative;
 		z-index: 1;
-		max-width: 430px;
+		max-width: 720px;
 		width: 100%;
 		margin: 0 auto;
 		padding: 12px 16px;
