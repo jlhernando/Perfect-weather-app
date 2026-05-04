@@ -60,9 +60,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 			});
 		}
 
-		// Step 2: Fetch actual observation data
+		// Step 2: Fetch actual observation data (AEMET returns ISO-8859-15 encoding)
 		const dataRes = await fetch(meta.datos);
-		const observations = (await dataRes.json()) as AemetObservation[];
+		const rawBytes = await dataRes.arrayBuffer();
+		const decodedText = new TextDecoder('iso-8859-15').decode(rawBytes);
+		const observations = JSON.parse(decodedText) as AemetObservation[];
 
 		// Step 3: Find the most recent observation from the nearest station
 		let bestStation: AemetObservation | null = null;
