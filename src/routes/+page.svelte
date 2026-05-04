@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getLocation, fetchWeather, reverseGeocode } from '$lib/api/weather';
-	import type { WeatherResponse, LocationResult } from '$lib/api/weather';
+	import { getLocation, fetchWeather, reverseGeocode, fetchAemetObservation } from '$lib/api/weather';
+	import type { WeatherResponse, LocationResult, AemetObservation } from '$lib/api/weather';
 	import CalendarStrip from '$lib/components/CalendarStrip.svelte';
 	import WeatherHeader from '$lib/components/WeatherHeader.svelte';
 
@@ -12,6 +12,7 @@
 	import UmbrellaIndicator from '$lib/components/UmbrellaIndicator.svelte';
 
 	let weatherData: WeatherResponse | null = $state(null);
+	let aemetData: AemetObservation | null = $state(null);
 	let locationName: string | null = $state(null);
 	let currentCoords: { lat: number; lon: number } | null = $state(null);
 	let selectedDay = $state(0);
@@ -82,9 +83,12 @@
 		return valid.length > 0 ? Math.round(Math.min(...valid)) : 0;
 	});
 
-	// Current temperature (only for today)
+	// Current temperature (only for today) — prefer AEMET real observation
 	let currentTemp = $derived.by(() => {
 		if (!dayData || !days[selectedDay]?.isToday) return null;
+		if (aemetData && tempMode === 'real') {
+			return Math.round(aemetData.temperature);
+		}
 		const hour = new Date().getHours();
 		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
 		return temps[hour] != null ? Math.round(temps[hour]) : null;
@@ -104,13 +108,15 @@
 		error = null;
 		selectedDay = 0;
 		try {
-			const [weather, name] = await Promise.all([
+			const [weather, name, aemet] = await Promise.all([
 				fetchWeather(loc.latitude, loc.longitude),
-				reverseGeocode(loc.latitude, loc.longitude)
+				reverseGeocode(loc.latitude, loc.longitude),
+				fetchAemetObservation(loc.latitude, loc.longitude)
 			]);
 			weatherData = weather;
 			locationName = name ?? loc.name;
 			currentCoords = { lat: loc.latitude, lon: loc.longitude };
+			aemetData = aemet;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load weather data';
 		} finally {
@@ -154,13 +160,15 @@
 	onMount(async () => {
 		try {
 			const coords = await getLocation();
-			const [weather, name] = await Promise.all([
+			const [weather, name, aemet] = await Promise.all([
 				fetchWeather(coords.lat, coords.lon),
-				reverseGeocode(coords.lat, coords.lon)
+				reverseGeocode(coords.lat, coords.lon),
+				fetchAemetObservation(coords.lat, coords.lon)
 			]);
 			weatherData = weather;
 			locationName = name;
 			currentCoords = coords;
+			aemetData = aemet;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load weather data';
 		} finally {
@@ -201,6 +209,7 @@
 			weatherCodes={dayData.weatherCodes}
 			{locationName}
 			dayOffset={selectedDay}
+			observedStation={selectedDay === 0 && aemetData ? aemetData.station : null}
 		/>
 
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} />

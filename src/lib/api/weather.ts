@@ -94,6 +94,28 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
 	}
 }
 
+export interface AemetObservation {
+	station: string;
+	distance: number;
+	timestamp: string;
+	temperature: number;
+	precipitation: number;
+	humidity: number;
+	windSpeed: number;
+	tempMax: number;
+	tempMin: number;
+}
+
+export async function fetchAemetObservation(lat: number, lon: number): Promise<AemetObservation | null> {
+	try {
+		const res = await fetch(`/api/aemet?lat=${lat}&lon=${lon}`);
+		if (!res.ok) return null;
+		return res.json();
+	} catch {
+		return null;
+	}
+}
+
 export async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
 	// Try Open-Meteo reverse geocoding first
 	try {

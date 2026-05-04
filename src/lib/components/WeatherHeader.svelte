@@ -10,9 +10,10 @@
 		weatherCodes: number[];
 		locationName: string | null;
 		dayOffset?: number;
+		observedStation?: string | null;
 	}
 
-	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0 }: Props = $props();
+	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0, observedStation = null }: Props = $props();
 
 	function getAccuracy(offset: number): { pct: number; color: string; label: string } {
 		if (offset <= 1) return { pct: 95, color: '#34c759', label: 'Muy fiable' };
@@ -39,7 +40,17 @@
 	};
 
 	let validCodes = $derived(weatherCodes.filter((c) => c != null));
-	let dominantIcon = $derived(validCodes.length > 0 ? getIcon(getDominantCode(validCodes)) : '');
+	// For today: show current hour's condition. For other days: show dominant condition.
+	let displayCode = $derived.by(() => {
+		if (validCodes.length === 0) return 3;
+		if (currentTemp != null) {
+			const hour = new Date().getHours();
+			const code = weatherCodes[hour];
+			if (code != null) return code;
+		}
+		return getDominantCode(validCodes);
+	});
+	let displayIcon = $derived(getIcon(displayCode));
 </script>
 
 <div class="text-center text-[15px] text-white/60 px-4 py-2 pb-3">
@@ -56,10 +67,14 @@
 					{maxTemp}&deg;<span class="text-white/30 px-2 tracking-normal">/</span><span class="text-white/50">{minTemp}&deg;</span>
 				</div>
 			{/if}
-			<div class="text-[15px] text-white/60 mt-1">{dominantIcon} {CONDITION_TEXT[getDominantCode(validCodes)] || ''}</div>
+			<div class="text-[15px] text-white/60 mt-1">{displayIcon} {CONDITION_TEXT[displayCode] || ''}</div>
 			<div class="text-[15px] text-white/40 mt-0.5">Max. {maxTemp}&deg;  Min. {minTemp}&deg;</div>
 			<div class="text-[12px] mt-1.5" style="color: {accuracy.color}; opacity: 0.7;">
-				{accuracy.label} ({accuracy.pct}%)
+				{#if observedStation}
+					Datos reales · {observedStation}
+				{:else}
+					{accuracy.label} ({accuracy.pct}%)
+				{/if}
 			</div>
 		</div>
 	{:else}
