@@ -4,9 +4,10 @@
 
 	interface Props {
 		onselect: (location: LocationResult) => void;
+		showButton?: boolean;
 	}
 
-	let { onselect }: Props = $props();
+	let { onselect, showButton = true }: Props = $props();
 
 	const POPULAR_CITIES: LocationResult[] = [
 		{ name: 'Madrid', admin1: 'Comunidad de Madrid', latitude: 40.4168, longitude: -3.7038 },
@@ -50,7 +51,7 @@
 		onselect(loc);
 	}
 
-	function openSearch() {
+	export function openSearch() {
 		open = true;
 		setTimeout(() => inputEl?.focus(), 50);
 	}
@@ -71,6 +72,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
+{#if showButton}
 <!-- Pin icon button — top right -->
 <button
 	onclick={openSearch}
@@ -82,6 +84,7 @@
 		<circle cx="12" cy="10" r="3" />
 	</svg>
 </button>
+{/if}
 
 <!-- Fullscreen overlay -->
 {#if open}
@@ -143,9 +146,9 @@
 
 <style>
 	.pin-button {
-		position: fixed;
-		top: 12px;
-		right: max(12px, calc(50% - 360px));
+		position: absolute;
+		top: 52px;
+		right: 12px;
 		z-index: 30;
 		width: 40px;
 		height: 40px;

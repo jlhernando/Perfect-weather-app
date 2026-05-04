@@ -20,6 +20,7 @@
 	let loading = $state(true);
 	let error: string | null = $state(null);
 	let chartComponent: WeatherChart;
+	let locationSearch: LocationSearch;
 	let shareStatus: 'idle' | 'copied' = $state('idle');
 
 	// Derived: days list (only include days with actual temperature data)
@@ -221,20 +222,12 @@
 		Could not load weather data.<br />{error}
 	</div>
 {:else if weatherData && dayData}
-	<LocationSearch onselect={handleLocationSelect} />
-	<!-- Share button — top left -->
-	<button
-		onclick={handleShare}
-		class="share-button"
-		aria-label="Compartir"
-	>
-		{#if shareStatus === 'copied'}
-			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-		{:else}
-			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-		{/if}
-	</button>
-	<div class="py-3 pb-8 animate-fade-in">
+	<!-- App header -->
+	<div class="app-header">
+		<span class="app-title">Perfect Weather</span>
+	</div>
+	<LocationSearch bind:this={locationSearch} onselect={handleLocationSelect} showButton={false} />
+	<div class="pb-20 animate-fade-in">
 		<WeatherHeader
 			date={days[selectedDay].date}
 			{currentTemp}
@@ -278,29 +271,74 @@
 			</div>
 		</div>
 	</div>
+	<!-- Bottom toolbar -->
+	<div class="bottom-toolbar">
+		<button class="toolbar-btn" onclick={() => locationSearch?.openSearch()} aria-label="Buscar ubicacion">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+				<circle cx="12" cy="10" r="3" />
+			</svg>
+			<span class="toolbar-label">Ubicacion</span>
+		</button>
+		<button class="toolbar-btn" onclick={handleShare} aria-label="Compartir">
+			{#if shareStatus === 'copied'}
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+				<span class="toolbar-label">Copiado</span>
+			{:else}
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+				<span class="toolbar-label">Compartir</span>
+			{/if}
+		</button>
+	</div>
 {/if}
 
 <style>
-	.share-button {
-		position: fixed;
-		top: 12px;
-		left: max(12px, calc(50% - 360px));
-		z-index: 40;
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(12px);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: rgba(255, 255, 255, 0.7);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: background 0.2s;
+	.app-header {
+		background: rgba(255, 255, 255, 0.04);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		padding: 14px 16px;
+		text-align: center;
 	}
-	.share-button:active {
-		background: rgba(255, 255, 255, 0.2);
+	.app-title {
+		font-size: 15px;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.7);
+		letter-spacing: 0.03em;
+	}
+	.bottom-toolbar {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 40;
+		display: flex;
+		justify-content: center;
+		gap: 32px;
+		padding: 10px 16px;
+		padding-bottom: max(10px, env(safe-area-inset-bottom));
+		background: rgba(28, 28, 30, 0.85);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+	}
+	.toolbar-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		background: none;
+		border: none;
+		color: rgba(255, 255, 255, 0.55);
+		cursor: pointer;
+		padding: 4px 16px;
+		transition: color 0.2s;
+	}
+	.toolbar-btn:active {
+		color: rgba(255, 255, 255, 0.85);
+	}
+	.toolbar-label {
+		font-size: 10px;
+		font-weight: 500;
 	}
 	.animate-fade-in {
 		animation: fadeIn 0.4s ease;
