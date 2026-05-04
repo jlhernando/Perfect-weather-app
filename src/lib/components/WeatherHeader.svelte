@@ -11,9 +11,10 @@
 		locationName: string | null;
 		dayOffset?: number;
 		observedStation?: string | null;
+		observedPrecipitation?: number | null;
 	}
 
-	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0, observedStation = null }: Props = $props();
+	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0, observedStation = null, observedPrecipitation = null }: Props = $props();
 
 	function getAccuracy(offset: number): { pct: number; color: string; label: string } {
 		if (offset <= 1) return { pct: 95, color: '#34c759', label: 'Muy fiable' };
@@ -41,12 +42,20 @@
 
 	let validCodes = $derived(weatherCodes.filter((c) => c != null));
 	// For today: show current hour's condition. For other days: show dominant condition.
+	const RAIN_CODES = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 85, 86, 95, 96, 99]);
+
 	let displayCode = $derived.by(() => {
 		if (validCodes.length === 0) return 3;
 		if (currentTemp != null) {
 			const hour = new Date().getHours();
-			const code = weatherCodes[hour];
-			if (code != null) return code;
+			let code = weatherCodes[hour];
+			if (code != null) {
+				// If AEMET says no rain but forecast says rain, override to non-rain
+				if (observedPrecipitation != null && observedPrecipitation === 0 && RAIN_CODES.has(code)) {
+					code = 2; // Partly cloudy instead
+				}
+				return code;
+			}
 		}
 		return getDominantCode(validCodes);
 	});

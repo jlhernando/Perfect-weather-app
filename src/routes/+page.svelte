@@ -68,19 +68,27 @@
 		return temps.some((t) => t != null);
 	});
 
-	// Derived: max/min temp for selected day
+	// Derived: max/min temp for selected day — corrected with AEMET observed data for today
 	let maxTemp = $derived.by(() => {
 		if (!dayData) return 0;
 		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
 		const valid = temps.filter((t) => t != null);
-		return valid.length > 0 ? Math.round(Math.max(...valid)) : 0;
+		let forecastMax = valid.length > 0 ? Math.round(Math.max(...valid)) : 0;
+		if (selectedDay === 0 && aemetData && tempMode === 'real') {
+			forecastMax = Math.max(forecastMax, Math.round(aemetData.tempMax));
+		}
+		return forecastMax;
 	});
 
 	let minTemp = $derived.by(() => {
 		if (!dayData) return 0;
 		const temps = tempMode === 'real' ? dayData.temperature : dayData.feelsLike;
 		const valid = temps.filter((t) => t != null);
-		return valid.length > 0 ? Math.round(Math.min(...valid)) : 0;
+		let forecastMin = valid.length > 0 ? Math.round(Math.min(...valid)) : 0;
+		if (selectedDay === 0 && aemetData && tempMode === 'real') {
+			forecastMin = Math.min(forecastMin, Math.round(aemetData.tempMin));
+		}
+		return forecastMin;
 	});
 
 	// Current temperature (only for today) — prefer AEMET real observation
@@ -210,6 +218,7 @@
 			{locationName}
 			dayOffset={selectedDay}
 			observedStation={selectedDay === 0 && aemetData ? aemetData.station : null}
+			observedPrecipitation={selectedDay === 0 && aemetData ? aemetData.precipitation : null}
 		/>
 
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} />
