@@ -94,6 +94,12 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
 	}
 }
 
+export interface AemetHourly {
+	time: string;
+	temperature: number;
+	precipitation: number;
+}
+
 export interface AemetObservation {
 	station: string;
 	distance: number;
@@ -104,6 +110,7 @@ export interface AemetObservation {
 	windSpeed: number;
 	tempMax: number;
 	tempMin: number;
+	hourly: AemetHourly[];
 }
 
 export async function fetchAemetObservation(lat: number, lon: number): Promise<AemetObservation | null> {

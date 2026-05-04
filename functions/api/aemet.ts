@@ -96,6 +96,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 			});
 		}
 
+		// Collect all hourly observations for the nearest station (sorted by time)
+		const stationHistory = observations
+			.filter((obs) => obs.idema === bestStation!.idema && obs.ta != null)
+			.sort((a, b) => a.fint.localeCompare(b.fint))
+			.map((obs) => ({
+				time: obs.fint,
+				temperature: obs.ta,
+				precipitation: obs.prec,
+			}));
+
 		return new Response(
 			JSON.stringify({
 				station: bestStation.ubi,
@@ -109,6 +119,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 				windDirection: bestStation.dv,
 				tempMax: bestStation.tamax,
 				tempMin: bestStation.tamin,
+				hourly: stationHistory,
 			}),
 			{
 				headers: {

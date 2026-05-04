@@ -102,6 +102,21 @@
 		return temps[hour] != null ? Math.round(temps[hour]) : null;
 	});
 
+	// Corrected hourly data: replace today's past hours with AEMET real observations
+	let correctedHourly = $derived.by(() => {
+		if (!weatherData || !aemetData?.hourly?.length) return weatherData?.hourly ?? null;
+		const hourly = { ...weatherData.hourly, temperature_2m: [...weatherData.hourly.temperature_2m] };
+		const dataStartTime = new Date(hourly.time[0]).getTime();
+		for (const obs of aemetData.hourly) {
+			const obsTime = new Date(obs.time).getTime();
+			const hourIdx = Math.round((obsTime - dataStartTime) / 3600000);
+			if (hourIdx >= 0 && hourIdx < hourly.temperature_2m.length) {
+				hourly.temperature_2m[hourIdx] = obs.temperature;
+			}
+		}
+		return hourly;
+	});
+
 	function handleDaySelect(index: number) {
 		selectedDay = index;
 		chartComponent?.scrollToDay(index);
@@ -225,7 +240,7 @@
 
 		<WeatherChart
 			bind:this={chartComponent}
-			hourly={weatherData.hourly}
+			hourly={correctedHourly ?? weatherData.hourly}
 			daily={weatherData.daily}
 			mode={tempMode}
 			{selectedDay}
