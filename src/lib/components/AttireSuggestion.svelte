@@ -6,42 +6,44 @@
 	let { maxTemp }: Props = $props();
 
 	let suggestion = $derived.by(() => {
-		if (maxTemp > 30) return { icon: '👕', label: 'Camiseta ligera', sub: 'Hace mucho calor' };
-		if (maxTemp > 20) return { icon: '👕', label: 'Camiseta', sub: 'Temperatura agradable' };
-		if (maxTemp > 14) return { icon: '🧥', label: 'Chaqueta', sub: 'Refresca un poco' };
+		if (maxTemp > 30) return { icon: '👕', label: 'Camiseta ligera', sub: 'Mucho calor' };
+		if (maxTemp > 20) return { icon: '👕', label: 'Camiseta', sub: 'Dia agradable' };
+		if (maxTemp > 14) return { icon: '🧥', label: 'Chaqueta', sub: 'Refresca' };
 		if (maxTemp > 5) return { icon: '🧣', label: 'Abrigo', sub: 'Hace frio' };
 		return { icon: '🧣', label: 'Abrigo grueso', sub: 'Mucho frio' };
 	});
 </script>
 
-<div class="card">
-	<div class="icon">{suggestion.icon}</div>
-	<div class="label">{suggestion.label}</div>
-	<div class="sub">{suggestion.sub}</div>
+<div class="insight-chip">
+	<span class="insight-icon">{suggestion.icon}</span>
+	<div class="insight-text">
+		<div class="it-title">{suggestion.label}</div>
+		<div class="it-sub">{suggestion.sub}</div>
+	</div>
 </div>
 
 <style>
-	.card {
-		flex: 1;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 16px;
-		padding: 14px 12px;
-		text-align: center;
+	.insight-chip {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 16px;
+		background: var(--color-dark-card);
+		border: 1px solid var(--color-dark-card-border);
+		border-radius: 14px;
+		backdrop-filter: blur(10px);
 	}
-	.icon {
-		font-size: 28px;
-		line-height: 1;
+	.insight-icon {
+		font-size: 22px;
 	}
-	.label {
-		font-size: 14px;
+	.it-title {
+		font-size: 13px;
 		font-weight: 500;
-		color: rgba(255, 255, 255, 0.85);
-		margin-top: 6px;
+		color: var(--color-text-1);
 	}
-	.sub {
+	.it-sub {
 		font-size: 11px;
-		color: rgba(255, 255, 255, 0.4);
-		margin-top: 2px;
+		color: var(--color-text-3);
 	}
 </style>

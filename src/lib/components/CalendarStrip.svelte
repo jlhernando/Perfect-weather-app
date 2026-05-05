@@ -10,111 +10,77 @@
 		days: DayInfo[];
 		selectedIndex: number;
 		onselect: (index: number) => void;
+		dayIcons?: string[];
+		dayTemps?: (number | null)[];
 	}
 
-	let { days, selectedIndex, onselect }: Props = $props();
+	let { days, selectedIndex, onselect, dayIcons = [], dayTemps = [] }: Props = $props();
 
-	// Forecast accuracy by day offset (well-established meteorological data)
-	function getAccuracy(dayOffset: number): { pct: number; color: string } {
-		if (dayOffset <= 1) return { pct: 95, color: '#34c759' };
-		if (dayOffset <= 2) return { pct: 90, color: '#34c759' };
-		if (dayOffset <= 3) return { pct: 85, color: '#30d158' };
-		if (dayOffset <= 4) return { pct: 80, color: '#ffd60a' };
-		if (dayOffset <= 5) return { pct: 75, color: '#ffd60a' };
-		if (dayOffset <= 6) return { pct: 70, color: '#ff9f0a' };
-		if (dayOffset <= 7) return { pct: 65, color: '#ff9f0a' };
-		if (dayOffset <= 8) return { pct: 55, color: '#ff6b6b' };
-		return { pct: 50, color: '#ff6b6b' };
-	}
-
-	function dayNameClass(day: DayInfo): string {
-		return `day-name ${day.isToday ? 'today' : ''}`;
-	}
-
-	function dayNumClass(day: DayInfo, i: number): string {
-		let cls = 'day-num';
-		if (i === selectedIndex && day.isToday) cls += ' selected-today';
-		else if (i === selectedIndex) cls += ' selected';
-		else if (day.isToday) cls += ' today';
-		return cls;
+	function getLabel(day: DayInfo): string {
+		if (day.isToday) return 'Hoy';
+		return dayNameShort(day.date);
 	}
 </script>
 
-<div class="calendar-strip">
+<div class="day-scroller">
 	{#each days as day, i}
-		<button class="day-btn" onclick={() => onselect(i)}>
-			<span class={dayNameClass(day)}>{dayNameShort(day.date)}</span>
-			<span class={dayNumClass(day, i)}>{day.date.getDate()}</span>
-			<span class="accuracy-dot" style="background: {getAccuracy(i).color};"></span>
+		<button
+			class="day-card"
+			class:active={i === selectedIndex}
+			onclick={() => onselect(i)}
+		>
+			<span class="dc-name">{getLabel(day)}</span>
+			<span class="dc-icon">{dayIcons[i] || '⛅'}</span>
+			<span class="dc-num">{dayTemps[i] != null ? `${dayTemps[i]}°` : `${day.date.getDate()}`}</span>
 		</button>
 	{/each}
 </div>
 
 <style>
-	.calendar-strip {
+	.day-scroller {
 		display: flex;
-		justify-content: flex-start;
-		padding: 8px 16px;
-		gap: 2px;
+		gap: 6px;
+		padding: 20px 24px;
+		overflow-x: auto;
+		scrollbar-width: none;
 	}
-	.day-btn {
+	.day-scroller::-webkit-scrollbar { display: none; }
+	.day-card {
+		flex-shrink: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		flex: 1;
-		max-width: 52px;
-		padding: 6px 2px;
+		gap: 6px;
+		padding: 12px 14px;
 		border-radius: 14px;
-		border: none;
-		background: none;
+		background: var(--color-dark-card);
+		border: 1px solid transparent;
 		cursor: pointer;
-		-webkit-user-select: none;
-		user-select: none;
-		transition: background 0.2s;
-	}
-	.day-btn:active {
-		background: rgba(255,255,255,0.08);
-	}
-	.day-name {
-		font-size: 11px;
-		font-weight: 600;
-		text-transform: uppercase;
-		margin-bottom: 4px;
-		color: rgba(255,255,255,0.5);
-	}
-	.day-name.today {
-		color: #0a84ff;
-	}
-	.day-num {
-		font-size: 16px;
-		font-weight: 500;
-		width: 30px;
-		height: 30px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-		color: white;
+		min-width: 54px;
 		transition: all 0.2s;
 	}
-	.day-num.today {
-		color: #0a84ff;
+	.day-card.active {
+		border-color: var(--color-accent);
+		background: rgba(96, 165, 250, 0.1);
 	}
-	.day-num.selected {
-		background: rgba(255,255,255,0.9);
-		color: black;
+	.dc-name {
+		font-size: 10px;
 		font-weight: 600;
+		text-transform: uppercase;
+		color: var(--color-text-3);
 	}
-	.day-num.selected-today {
-		background: #0a84ff;
-		color: white;
-		font-weight: 600;
+	.day-card.active .dc-name {
+		color: var(--color-accent);
 	}
-	.accuracy-dot {
-		width: 5px;
-		height: 5px;
-		border-radius: 50%;
-		margin-top: 4px;
-		opacity: 0.8;
+	.dc-num {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--color-text-2);
+	}
+	.day-card.active .dc-num {
+		color: var(--color-text-1);
+	}
+	.dc-icon {
+		font-size: 16px;
 	}
 </style>

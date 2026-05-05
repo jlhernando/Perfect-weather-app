@@ -5,28 +5,33 @@
 	}
 
 	let { mode, onchange }: Props = $props();
-
-	function btnClass(target: 'real' | 'feels'): string {
-		const base = 'flex-1 py-2 px-4 rounded-[18px] text-sm font-medium transition-all font-sans cursor-pointer border-none';
-		if (mode === target) return `${base} bg-white/[0.18] text-white`;
-		return `${base} text-white/50`;
-	}
 </script>
 
-<div class="flex mx-5 mt-4 bg-white/[0.08] rounded-[20px] p-[3px]">
-	<button
-		class={btnClass('real')}
-		onclick={() => onchange('real')}
-	>
-		Real
-	</button>
-	<button
-		class={btnClass('feels')}
-		onclick={() => onchange('feels')}
-	>
-		Sensacion
-	</button>
+<div class="toggle-pills">
+	<button class:on={mode === 'real'} onclick={() => onchange('real')}>Real</button>
+	<button class:on={mode === 'feels'} onclick={() => onchange('feels')}>Sensacion</button>
 </div>
-<div class="text-center text-xs text-white/35 pt-2 px-5">
-	{mode === 'real' ? 'La temperatura real.' : 'Sensacion termica.'}
-</div>
+
+<style>
+	.toggle-pills {
+		display: flex;
+		background: rgba(255, 255, 255, 0.06);
+		border-radius: 8px;
+		padding: 2px;
+	}
+	button {
+		padding: 6px 12px;
+		border: none;
+		border-radius: 6px;
+		font-size: 12px;
+		font-weight: 500;
+		cursor: pointer;
+		background: none;
+		color: var(--color-text-3);
+		transition: all 0.2s;
+	}
+	button.on {
+		background: rgba(255, 255, 255, 0.12);
+		color: var(--color-text-1);
+	}
+</style>

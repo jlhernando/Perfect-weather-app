@@ -8,64 +8,39 @@
 	const RAIN_CODES = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 85, 86, 95, 96, 99]);
 
 	let needsUmbrella = $derived(weatherCodes.some((c) => RAIN_CODES.has(c)));
+	let rainHours = $derived(weatherCodes.filter((c) => RAIN_CODES.has(c)).length);
 </script>
 
-<div class="card">
-	<div class="icon-wrap">
-		<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<!-- Umbrella -->
-			<path
-				d="M12 2C6.5 2 2 6.5 2 12h4.5c0-1.5 1-3 3.5-3s3.5 1.5 3.5 3H22c0-5.5-4.5-10-10-10z"
-				fill={needsUmbrella ? 'rgba(90, 160, 255, 0.85)' : 'rgba(255, 255, 255, 0.2)'}
-			/>
-			<!-- Handle -->
-			<path
-				d="M12 12v7c0 1.1-.9 2-2 2s-2-.9-2-2"
-				stroke={needsUmbrella ? 'rgba(90, 160, 255, 0.85)' : 'rgba(255, 255, 255, 0.2)'}
-				stroke-width="2"
-				stroke-linecap="round"
-				fill="none"
-			/>
-			<!-- Strikethrough line when no rain -->
-			{#if !needsUmbrella}
-				<line
-					x1="4" y1="20" x2="20" y2="4"
-					stroke="rgba(255, 255, 255, 0.35)"
-					stroke-width="2"
-					stroke-linecap="round"
-				/>
-			{/if}
-		</svg>
+<div class="insight-chip">
+	<span class="insight-icon">{needsUmbrella ? '☂️' : '☀️'}</span>
+	<div class="insight-text">
+		<div class="it-title">{needsUmbrella ? 'Lleva paraguas' : 'Sin paraguas'}</div>
+		<div class="it-sub">{needsUmbrella ? `${rainHours}h de lluvia` : '0% lluvia'}</div>
 	</div>
-	<div class="label" class:active={needsUmbrella}>{needsUmbrella ? 'Lleva paraguas' : 'Sin paraguas'}</div>
-	<div class="sub">{needsUmbrella ? 'Se espera lluvia' : 'No se espera lluvia'}</div>
 </div>
 
 <style>
-	.card {
-		flex: 1;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 16px;
-		padding: 14px 12px;
-		text-align: center;
-	}
-	.icon-wrap {
+	.insight-chip {
+		flex-shrink: 0;
 		display: flex;
-		justify-content: center;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 16px;
+		background: var(--color-dark-card);
+		border: 1px solid var(--color-dark-card-border);
+		border-radius: 14px;
+		backdrop-filter: blur(10px);
 	}
-	.label {
-		font-size: 14px;
+	.insight-icon {
+		font-size: 22px;
+	}
+	.it-title {
+		font-size: 13px;
 		font-weight: 500;
-		color: rgba(255, 255, 255, 0.4);
-		margin-top: 6px;
+		color: var(--color-text-1);
 	}
-	.label.active {
-		color: rgba(90, 160, 255, 0.9);
-	}
-	.sub {
+	.it-sub {
 		font-size: 11px;
-		color: rgba(255, 255, 255, 0.4);
-		margin-top: 2px;
+		color: var(--color-text-3);
 	}
 </style>

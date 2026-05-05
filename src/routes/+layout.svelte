@@ -4,6 +4,22 @@
 	let { children } = $props();
 </script>
 
-<div class="max-w-[430px] sm:max-w-[540px] md:max-w-[640px] lg:max-w-[720px] mx-auto min-h-screen relative font-sans px-0 sm:px-4 md:px-6">
+<div class="app-container">
 	{@render children()}
 </div>
+
+<style>
+	.app-container {
+		max-width: 430px;
+		margin: 0 auto;
+		min-height: 100vh;
+		position: relative;
+		font-family: var(--font-sans);
+		overflow: hidden;
+	}
+	@media (min-width: 640px) {
+		.app-container {
+			max-width: 540px;
+		}
+	}
+</style>
