@@ -67,53 +67,10 @@
 		return parts.join(' · ');
 	});
 
-	// Generate narrative text based on weather conditions
-	let narrative = $derived.by(() => {
-		const temp = currentTemp ?? maxTemp ?? 20;
-		const hasRain = validCodes.some(c => RAIN_CODES.has(c));
-		const code = displayCode;
-
-		let conditionAdj = '';
-		let activity = '';
-
-		if (code === 0 || code === 1) conditionAdj = 'despejada';
-		else if (code === 2) conditionAdj = 'con nubes y claros';
-		else if (code === 3) conditionAdj = 'nublada';
-		else if (code === 45 || code === 48) conditionAdj = 'con niebla';
-		else if (hasRain) conditionAdj = 'lluviosa';
-		else conditionAdj = 'variable';
-
-		let tempAdj = '';
-		if (temp > 30) tempAdj = 'calurosa';
-		else if (temp > 22) tempAdj = 'calida';
-		else if (temp > 15) tempAdj = 'templada';
-		else if (temp > 8) tempAdj = 'fresca';
-		else tempAdj = 'fria';
-
-		const period = timeOfDay || 'Jornada';
-
-		if (hasRain) {
-			activity = 'Lleva paraguas si sales.';
-		} else if (temp > 22 && !hasRain) {
-			activity = 'Buen momento para actividades al aire libre.';
-		} else if (temp > 15) {
-			activity = 'Agradable para pasear.';
-		} else {
-			activity = 'Abrigate bien si sales.';
-		}
-
-		return {
-			main: `${period} <strong>${tempAdj} y ${conditionAdj}</strong>.`,
-			activity
-		};
-	});
 </script>
 
 <div class="story-header">
 	<div class="time-context">{timeContext}</div>
-	{#if maxTemp != null && minTemp != null}
-		<div class="narrative">{@html narrative.main} {narrative.activity}</div>
-	{/if}
 </div>
 
 {#if maxTemp != null && minTemp != null}
@@ -154,18 +111,6 @@
 		color: var(--color-text-3);
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-	}
-	.narrative {
-		font-size: 20px;
-		font-weight: 300;
-		line-height: 1.4;
-		color: var(--color-text-2);
-		margin-top: 8px;
-		max-width: 320px;
-	}
-	.narrative :global(strong) {
-		color: var(--color-text-1);
-		font-weight: 500;
 	}
 	.temp-ambient {
 		padding: 20px 24px 0;
