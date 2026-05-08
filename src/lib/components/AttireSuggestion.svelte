@@ -16,7 +16,6 @@
 
 <div class="insight-pill">
 	<span class="pill-icon">{suggestion.icon}</span>
-	<span class="pill-label">{suggestion.label}</span>
 </div>
 
 <style>

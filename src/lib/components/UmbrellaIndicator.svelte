@@ -13,7 +13,9 @@
 
 <div class="insight-pill">
 	<span class="pill-icon">{needsUmbrella ? '☂️' : '☀️'}</span>
-	<span class="pill-label">{needsUmbrella ? `Paraguas · ${rainHours}h` : 'Sin lluvia'}</span>
+	{#if needsUmbrella}
+		<span class="pill-label">{rainHours}h</span>
+	{/if}
 </div>
 
 <style>

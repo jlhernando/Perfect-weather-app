@@ -7,8 +7,6 @@
 	import WeatherChart from '$lib/components/WeatherChart.svelte';
 	import TempToggle from '$lib/components/TempToggle.svelte';
 	import LocationSearch from '$lib/components/LocationSearch.svelte';
-	import AttireSuggestion from '$lib/components/AttireSuggestion.svelte';
-	import UmbrellaIndicator from '$lib/components/UmbrellaIndicator.svelte';
 	import { getIcon, getDominantCode } from '$lib/utils/icons';
 
 	let weatherData: WeatherResponse | null = $state(null);
@@ -252,13 +250,9 @@
 			dayOffset={selectedDay}
 			observedStation={selectedDay === 0 && aemetData ? aemetData.station : null}
 			observedPrecipitation={selectedDay === 0 && aemetData ? aemetData.precipitation : null}
+			attireMaxTemp={maxTemp}
+			umbrellaWeatherCodes={dayData.weatherCodes}
 		/>
-
-		<!-- Insight pills row -->
-		<div class="insight-pills">
-			<AttireSuggestion {maxTemp} />
-			<UmbrellaIndicator weatherCodes={dayData.weatherCodes} />
-		</div>
 
 		<!-- Day scroller -->
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} {dayIcons} {dayTemps} />
@@ -403,14 +397,6 @@
 	}
 	.dot-rain {
 		background: rgba(96, 165, 250, 0.3);
-	}
-
-	/* Insight pills */
-	.insight-pills {
-		display: flex;
-		gap: 8px;
-		padding: 12px 24px 0;
-		flex-wrap: wrap;
 	}
 
 	/* Bottom spacer */

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { getIcon, getDominantCode } from '$lib/utils/icons';
+	import AttireSuggestion from './AttireSuggestion.svelte';
+	import UmbrellaIndicator from './UmbrellaIndicator.svelte';
 
 	interface Props {
 		date: Date;
@@ -11,9 +13,11 @@
 		dayOffset?: number;
 		observedStation?: string | null;
 		observedPrecipitation?: number | null;
+		attireMaxTemp?: number | null;
+		umbrellaWeatherCodes?: number[];
 	}
 
-	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0, observedStation = null, observedPrecipitation = null }: Props = $props();
+	let { date, currentTemp, maxTemp, minTemp, weatherCodes, locationName, dayOffset = 0, observedStation = null, observedPrecipitation = null, attireMaxTemp = null, umbrellaWeatherCodes = [] }: Props = $props();
 
 	const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
 	const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -88,11 +92,19 @@
 		</div>
 	</div>
 
-	<div class="location-pill">
-		<span class="loc-dot"></span>
-		<span class="loc-text">{locationName ?? 'Cargando...'}</span>
-		{#if observedStation}
-			<span class="loc-source">· {observedStation}</span>
+	<div class="pills-row">
+		<div class="location-pill">
+			<span class="loc-dot"></span>
+			<span class="loc-text">{locationName ?? 'Cargando...'}</span>
+			{#if observedStation}
+				<span class="loc-source">· {observedStation}</span>
+			{/if}
+		</div>
+		{#if attireMaxTemp != null}
+			<AttireSuggestion maxTemp={attireMaxTemp} />
+		{/if}
+		{#if umbrellaWeatherCodes.length > 0}
+			<UmbrellaIndicator weatherCodes={umbrellaWeatherCodes} />
 		{/if}
 	</div>
 {:else}
@@ -137,11 +149,17 @@
 		color: var(--color-text-3);
 		margin-top: 2px;
 	}
+	.pills-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 16px 24px 0;
+		flex-wrap: wrap;
+	}
 	.location-pill {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		margin: 16px 24px 0;
 		padding: 8px 14px;
 		border-radius: 20px;
 		background: var(--color-dark-card);
