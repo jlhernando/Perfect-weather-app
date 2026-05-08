@@ -43,14 +43,34 @@ export async function getLocation(): Promise<Coords> {
 		}
 	}
 
+	if (typeof navigator === 'undefined' || !navigator.geolocation) {
+		return TRES_CANTOS;
+	}
+
 	return new Promise((resolve) => {
-		if (typeof navigator === 'undefined' || !navigator.geolocation) {
-			resolve(TRES_CANTOS);
-			return;
-		}
+		let resolved = false;
+		const fallback = setTimeout(() => {
+			if (!resolved) {
+				resolved = true;
+				resolve(TRES_CANTOS);
+			}
+		}, 8000);
+
 		navigator.geolocation.getCurrentPosition(
-			(pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-			() => resolve(TRES_CANTOS),
+			(pos) => {
+				if (!resolved) {
+					resolved = true;
+					clearTimeout(fallback);
+					resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+				}
+			},
+			() => {
+				if (!resolved) {
+					resolved = true;
+					clearTimeout(fallback);
+					resolve(TRES_CANTOS);
+				}
+			},
 			{ timeout: 5000, maximumAge: 300000 }
 		);
 	});
