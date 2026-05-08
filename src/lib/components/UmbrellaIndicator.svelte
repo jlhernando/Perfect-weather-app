@@ -11,36 +11,27 @@
 	let rainHours = $derived(weatherCodes.filter((c) => RAIN_CODES.has(c)).length);
 </script>
 
-<div class="insight-chip">
-	<span class="insight-icon">{needsUmbrella ? '☂️' : '☀️'}</span>
-	<div class="insight-text">
-		<div class="it-title">{needsUmbrella ? 'Lleva paraguas' : 'Sin paraguas'}</div>
-		<div class="it-sub">{needsUmbrella ? `${rainHours}h de lluvia` : '0% lluvia'}</div>
-	</div>
+<div class="insight-pill">
+	<span class="pill-icon">{needsUmbrella ? '☂️' : '☀️'}</span>
+	<span class="pill-label">{needsUmbrella ? `Paraguas · ${rainHours}h` : 'Sin lluvia'}</span>
 </div>
 
 <style>
-	.insight-chip {
-		flex-shrink: 0;
-		display: flex;
+	.insight-pill {
+		display: inline-flex;
 		align-items: center;
-		gap: 8px;
-		padding: 12px 16px;
+		gap: 6px;
+		padding: 8px 14px;
+		border-radius: 20px;
 		background: var(--color-dark-card);
 		border: 1px solid var(--color-dark-card-border);
-		border-radius: 14px;
 		backdrop-filter: blur(10px);
 	}
-	.insight-icon {
-		font-size: 22px;
+	.pill-icon {
+		font-size: 14px;
 	}
-	.it-title {
+	.pill-label {
 		font-size: 13px;
-		font-weight: 500;
-		color: var(--color-text-1);
-	}
-	.it-sub {
-		font-size: 11px;
-		color: var(--color-text-3);
+		color: var(--color-text-2);
 	}
 </style>

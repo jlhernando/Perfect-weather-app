@@ -254,6 +254,12 @@
 			observedPrecipitation={selectedDay === 0 && aemetData ? aemetData.precipitation : null}
 		/>
 
+		<!-- Insight pills row -->
+		<div class="insight-pills">
+			<AttireSuggestion {maxTemp} />
+			<UmbrellaIndicator weatherCodes={dayData.weatherCodes} />
+		</div>
+
 		<!-- Day scroller -->
 		<CalendarStrip {days} selectedIndex={selectedDay} onselect={handleDaySelect} {dayIcons} {dayTemps} />
 
@@ -274,12 +280,6 @@
 					<span><span class="dot dot-rain"></span>Lluvia</span>
 				</div>
 			</div>
-		</div>
-
-		<!-- Insight chips -->
-		<div class="insights">
-			<AttireSuggestion {maxTemp} />
-			<UmbrellaIndicator weatherCodes={dayData.weatherCodes} />
 		</div>
 
 		<!-- Spacer for bottom bar -->
@@ -405,15 +405,13 @@
 		background: rgba(96, 165, 250, 0.3);
 	}
 
-	/* Insights */
-	.insights {
+	/* Insight pills */
+	.insight-pills {
 		display: flex;
-		gap: 10px;
-		padding: 20px 16px;
-		overflow-x: auto;
-		scrollbar-width: none;
+		gap: 8px;
+		padding: 12px 24px 0;
+		flex-wrap: wrap;
 	}
-	.insights::-webkit-scrollbar { display: none; }
 
 	/* Bottom spacer */
 	.bottom-spacer {
